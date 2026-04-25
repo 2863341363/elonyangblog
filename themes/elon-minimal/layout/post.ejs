@@ -1,0 +1,18 @@
+<article class="article-shell">
+  <p class="meta"><%= date(page.date, 'YYYY-MM-DD') %><% if (page.categories && page.categories.length) { %> · <%= page.categories.first().name %><% } %><% if (page.tags && page.tags.length) { %> · <%= page.tags.map(function(tag) { return tag.name; }).join(' / ') %><% } %></p>
+  <h1><%= page.title %></h1>
+  <% if (page.description) { %>
+    <p class="lead"><%= page.description %></p>
+  <% } %>
+  <div class="article-content">
+    <%- page.content %>
+  </div>
+  <footer class="article-nav">
+    <a href="<%- url_for('/posts/') %>">返回文章列表</a>
+    <% if (page.next) { %>
+      <a href="<%- url_for(page.next.path) %>">下一篇：<%= page.next.title %></a>
+    <% } else if (page.prev) { %>
+      <a href="<%- url_for(page.prev.path) %>">上一篇：<%= page.prev.title %></a>
+    <% } %>
+  </footer>
+</article>

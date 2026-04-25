@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="<%= config.language || 'zh-CN' %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><% if (page.title && !is_home()) { %><%= page.title %> · <% } %><%= config.title %></title>
+  <meta name="description" content="<%= page.description || config.description || '' %>">
+  <meta name="keywords" content="<%= config.keywords || '' %>">
+  <link rel="stylesheet" href="<%- url_for('/css/style.css') %>">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="<%- url_for('/') %>" aria-label="<%= config.title %>">
+        <span class="brand-mark">E</span>
+        <span>ElonYang</span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a class="<%= is_home() ? 'active' : '' %>" href="<%- url_for('/') %>">首页</a>
+        <a class="<%= page.path && page.path.indexOf('posts/') === 0 ? 'active' : '' %>" href="<%- url_for('/posts/') %>">文章</a>
+        <a class="<%= page.path && page.path.indexOf('categories/') === 0 ? 'active' : '' %>" href="<%- url_for('/categories/') %>">分类</a>
+        <a class="<%= page.path && page.path.indexOf('tags/') === 0 ? 'active' : '' %>" href="<%- url_for('/tags/') %>">标签</a>
+        <a class="<%= page.path && page.path.indexOf('search/') === 0 ? 'active' : '' %>" href="<%- url_for('/search/') %>">搜索</a>
+        <a class="<%= page.path && page.path.indexOf('about/') === 0 ? 'active' : '' %>" href="<%- url_for('/about/') %>">关于</a>
+      </nav>
+    </header>
+
+    <main>
+      <%- body %>
+    </main>
+
+    <footer class="site-footer">
+      <span>© <%= date(new Date(), 'YYYY') %> ElonYang</span>
+      <span>Powered by Hexo</span>
+    </footer>
+  </div>
+  <script src="<%- url_for('/js/search.js') %>" defer></script>
+</body>
+</html>

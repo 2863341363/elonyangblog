@@ -1,0 +1,26 @@
+<% const searchPosts = site.posts.sort('-date').toArray().map(function(post) {
+  return {
+    title: post.title,
+    url: url_for(post.path),
+    date: date(post.date, 'YYYY-MM-DD'),
+    category: post.categories && post.categories.length ? post.categories.first().name : '',
+    tags: post.tags && post.tags.length ? post.tags.map(function(tag) { return tag.name; }).join(' ') : '',
+    summary: strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 180)
+  };
+}); %>
+
+<section class="page-title">
+  <p class="eyebrow">Search</p>
+  <h1>搜索</h1>
+  <p>输入关键词，快速定位文章。</p>
+</section>
+
+<section class="paper search-panel">
+  <label class="search-box">
+    <span>搜索</span>
+    <input id="search-input" type="search" placeholder="输入关键词搜索..." autocomplete="off">
+  </label>
+  <p id="search-status" class="result-count">输入关键词后显示结果。</p>
+  <div id="search-results"></div>
+  <script id="search-data" type="application/json"><%- JSON.stringify(searchPosts).replace(/</g, '\\u003c') %></script>
+</section>

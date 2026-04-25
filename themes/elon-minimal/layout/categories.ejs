@@ -1,0 +1,27 @@
+<% const categories = site.categories.sort('name').toArray(); %>
+
+<section class="page-title">
+  <p class="eyebrow">Topics</p>
+  <h1>分类</h1>
+  <p>按主题进入内容集合，适合系统性回看。</p>
+</section>
+
+<section class="category-grid">
+  <% if (categories.length) { %>
+    <% categories.forEach(function(category) { %>
+      <a class="category-card" href="<%- url_for(category.path) %>">
+        <span><%= category.length %> 篇</span>
+        <h2><%= category.name %></h2>
+        <p>查看这个主题下的所有记录。</p>
+      </a>
+    <% }) %>
+  <% } else { %>
+    <% ['技术笔记', '学习路线', '项目复盘', '工具效率'].forEach(function(name) { %>
+      <div class="category-card">
+        <span>0 篇</span>
+        <h2><%= name %></h2>
+        <p>后续文章会归档到这里。</p>
+      </div>
+    <% }) %>
+  <% } %>
+</section>

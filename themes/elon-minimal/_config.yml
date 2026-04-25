@@ -1,0 +1,20 @@
+nav:
+  - title: 首页
+    path: /
+  - title: 文章
+    path: /posts/
+  - title: 分类
+    path: /categories/
+  - title: 标签
+    path: /tags/
+  - title: 搜索
+    path: /search/
+  - title: 关于
+    path: /about/
+
+footer:
+  links:
+    - title: GitHub
+      path: https://github.com/
+    - title: Email
+      path: mailto:your-email@example.com

@@ -1,0 +1,21 @@
+<% const tags = site.tags.sort('name').toArray(); %>
+
+<section class="page-title">
+  <p class="eyebrow">Keywords</p>
+  <h1>标签</h1>
+  <p>用更细的关键词找到相关内容。</p>
+</section>
+
+<section class="paper">
+  <div class="tag-cloud">
+    <% if (tags.length) { %>
+      <% tags.forEach(function(tag) { %>
+        <a href="<%- url_for(tag.path) %>"><%= tag.name %> <span><%= tag.length %></span></a>
+      <% }) %>
+    <% } else { %>
+      <% ['Hexo', '前端', 'CSS', '部署', 'Markdown', '效率工具'].forEach(function(name) { %>
+        <span class="tag-placeholder"><%= name %></span>
+      <% }) %>
+    <% } %>
+  </div>
+</section>

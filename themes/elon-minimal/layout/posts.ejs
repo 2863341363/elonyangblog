@@ -1,0 +1,21 @@
+<% const posts = site.posts.sort('-date').toArray(); %>
+
+<section class="page-title">
+  <p class="eyebrow">Archive</p>
+  <h1>文章</h1>
+  <p>按时间浏览所有记录，新的思考放在前面。</p>
+</section>
+
+<section class="paper">
+  <div class="toolbar">
+    <span>共 <%= posts.length %> 篇文章</span>
+    <span>按发布时间倒序</span>
+  </div>
+  <% posts.forEach(function(post) { %>
+    <article class="post-row">
+      <p class="meta"><%= date(post.date, 'YYYY-MM-DD') %><% if (post.categories && post.categories.length) { %> · <%= post.categories.first().name %><% } %></p>
+      <h2><a href="<%- url_for(post.path) %>"><%= post.title %></a></h2>
+      <p><%= strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 150) || '这篇文章还没有摘要。' %></p>
+    </article>
+  <% }) %>
+</section>

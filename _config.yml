@@ -3,9 +3,9 @@
 
 # Site
 title: ElonYang的博客
-subtitle: 版权归ElonYang
-description: 风格简洁，美观整齐
-keywords: 简洁、美观、整齐、博客、个人网站
+subtitle: 记录学习、技术和生活
+description: ElonYang 的个人博客，记录学习路线、技术笔记、项目复盘和生活思考。
+keywords: ElonYang,个人博客,技术笔记,学习路线,项目复盘
 author: 杨忠
 language: zh-CN
 timezone: Asia/Shanghai
@@ -55,7 +55,7 @@ prismjs:
 
 # Home page
 index_generator:
-  path: posts
+  path: ''
   per_page: 10
   order_by: -date
 
@@ -82,7 +82,7 @@ exclude:
 ignore:
 
 # Theme
-theme: fluid
+theme: elon-minimal
 
 # Deployment
 deploy:

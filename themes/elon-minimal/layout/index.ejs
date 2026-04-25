@@ -1,0 +1,48 @@
+<% const latestPosts = site.posts.sort('-date').toArray(); %>
+<% const categories = site.categories.sort('name').toArray(); %>
+
+<section class="hero hero-home">
+  <p class="eyebrow">Personal Journal</p>
+  <h1>记录学习、技术和生活</h1>
+  <p>在稳定的节奏里写下问题、答案和慢慢成形的判断。</p>
+</section>
+
+<section class="home-grid">
+  <div class="panel">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Latest</p>
+        <h2>最近文章</h2>
+      </div>
+      <a class="text-link" href="<%- url_for('/posts/') %>">全部文章</a>
+    </div>
+    <% if (latestPosts.length) { %>
+      <% latestPosts.slice(0, 5).forEach(function(post) { %>
+        <article class="post-row">
+          <p class="meta"><%= date(post.date, 'YYYY-MM-DD') %><% if (post.categories && post.categories.length) { %> · <%= post.categories.first().name %><% } %></p>
+          <h3><a href="<%- url_for(post.path) %>"><%= post.title %></a></h3>
+          <p><%= strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 120) || '这篇文章还没有摘要，点进去继续阅读。' %></p>
+        </article>
+      <% }) %>
+    <% } else { %>
+      <p class="empty">还没有文章，先写下第一篇吧。</p>
+    <% } %>
+  </div>
+
+  <aside class="panel side-panel">
+    <p class="eyebrow">Topics</p>
+    <h2>写作方向</h2>
+    <div class="topic-list">
+      <% if (categories.length) { %>
+        <% categories.slice(0, 6).forEach(function(category) { %>
+          <a href="<%- url_for(category.path) %>"><span><%= category.name %></span><em><%= category.length %></em></a>
+        <% }) %>
+      <% } else { %>
+        <a href="<%- url_for('/categories/') %>"><span>技术笔记</span><em>0</em></a>
+        <a href="<%- url_for('/categories/') %>"><span>学习路线</span><em>0</em></a>
+        <a href="<%- url_for('/categories/') %>"><span>项目复盘</span><em>0</em></a>
+        <a href="<%- url_for('/categories/') %>"><span>生活随笔</span><em>0</em></a>
+      <% } %>
+    </div>
+  </aside>
+</section>
