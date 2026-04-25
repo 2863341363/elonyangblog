@@ -1,11 +1,14 @@
 import locale
 import os
+import re
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
 BLOG_DIR = Path(__file__).resolve().parent
+POSTS_DIR = BLOG_DIR / "source" / "_posts"
 NPM_CANDIDATES = [
     "npm.cmd",
     r"D:\Environment\NodeJS\npm.cmd",
@@ -42,6 +45,256 @@ def run(args, check=True, capture=False):
             print(output)
         raise SystemExit(result.returncode)
     return output if capture else ""
+
+
+def input_default(prompt, default=""):
+    suffix = f"（默认：{default}）" if default else ""
+    value = input(f"{prompt}{suffix}：").strip()
+    return value or default
+
+
+def input_required(prompt):
+    while True:
+        value = input(f"{prompt}：").strip()
+        if value:
+            return value
+        print("这里不能为空。")
+
+
+def input_required_default(prompt, default=""):
+    while True:
+        value = input_default(prompt, default)
+        if value:
+            return value
+        print("这里不能为空。")
+
+
+def split_items(text):
+    text = text.replace("，", ",")
+    return [item.strip() for item in text.split(",") if item.strip()]
+
+
+def slugify_filename(text):
+    value = text.strip().replace("\\", "-").replace("/", "-")
+    value = re.sub(r'[<>:"|?*\r\n\t]+', "-", value)
+    value = re.sub(r"\s+", "-", value).strip(".- ")
+    return value or datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+def yaml_scalar(value):
+    value = str(value or "").replace("\r", " ").replace("\n", " ").strip()
+    if not value:
+        return '""'
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
+def yaml_list(key, values):
+    lines = [f"{key}:"]
+    if not values:
+        lines.append("  - 未分类")
+        return lines
+    lines.extend(f"  - {item}" for item in values)
+    return lines
+
+
+def build_front_matter(meta):
+    lines = [
+        "---",
+        f"title: {yaml_scalar(meta['title'])}",
+        f"date: {meta['date']}",
+        *yaml_list("categories", meta["categories"]),
+    ]
+    if meta["tags"]:
+        lines.extend(yaml_list("tags", meta["tags"]))
+    lines.append(f"description: {yaml_scalar(meta['description'])}")
+    lines.append("---")
+    return "\n".join(lines)
+
+
+def ask_post_meta(existing=None):
+    existing = existing or {}
+    print("\n请填写文章配置。多个分类或标签可以用英文逗号分隔。")
+    title = input_required_default("title 标题", existing.get("title", "")) if existing else input_required("title 标题")
+    default_date = existing.get("date") or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    date_text = input_default("date 发布时间", default_date)
+    category_default = ",".join(existing.get("categories", [])) or "技术笔记"
+    categories = split_items(input_default("categories 分类", category_default))
+    tag_default = ",".join(existing.get("tags", []))
+    tags = split_items(input_default("tags 标签，可留空", tag_default))
+    description = input_required_default("description 摘要", existing.get("description", ""))
+    return {
+        "title": title,
+        "date": date_text,
+        "categories": categories,
+        "tags": tags,
+        "description": description,
+    }
+
+
+def parse_simple_front_matter(text):
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    if not normalized.startswith("---\n"):
+        return {}, normalized
+    end = normalized.find("\n---", 4)
+    if end == -1:
+        return {}, normalized
+
+    raw = normalized[4:end].strip("\n")
+    body = normalized[end + len("\n---"):].lstrip("\n")
+    meta = {}
+    current_key = None
+    for line in raw.splitlines():
+        if not line.strip():
+            continue
+        if line.startswith("  - ") and current_key:
+            meta.setdefault(current_key, []).append(line[4:].strip())
+            continue
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        current_key = key
+        if value:
+            meta[key] = value
+        elif key in ("categories", "tags"):
+            meta[key] = []
+    return meta, body
+
+
+def normalize_existing_meta(meta):
+    def as_list(value):
+        if isinstance(value, list):
+            return value
+        if not value:
+            return []
+        return [str(value)]
+
+    return {
+        "title": meta.get("title", ""),
+        "date": meta.get("date", ""),
+        "categories": as_list(meta.get("categories")),
+        "tags": as_list(meta.get("tags")),
+        "description": meta.get("description", ""),
+    }
+
+
+def create_post_interactive():
+    POSTS_DIR.mkdir(parents=True, exist_ok=True)
+    meta = ask_post_meta()
+    default_name = f"{slugify_filename(meta['title'])}.md"
+    filename = input_default("文件名", default_name)
+    if not filename.lower().endswith(".md"):
+        filename += ".md"
+
+    path = POSTS_DIR / filename
+    if path.exists():
+        raise SystemExit(f"文章已存在：{path}")
+
+    body = input_default("正文开头，可留空", "这里开始写正文。")
+    content = f"{build_front_matter(meta)}\n\n{body}\n"
+    path.write_text(content, encoding="utf-8", newline="\n")
+    print(f"\n已创建文章：{path}")
+    return path
+
+
+def list_posts():
+    POSTS_DIR.mkdir(parents=True, exist_ok=True)
+    return sorted(POSTS_DIR.glob("*.md"), key=lambda item: item.stat().st_mtime, reverse=True)
+
+
+def choose_post_file():
+    posts = list_posts()
+    if not posts:
+        raise SystemExit("还没有文章文件。")
+
+    print("\n请选择要修改配置的文章：")
+    for index, path in enumerate(posts, start=1):
+        print(f"  {index}. {path.name}")
+
+    while True:
+        value = input("请输入编号，或直接输入文件名：").strip()
+        if value.isdigit():
+            index = int(value)
+            if 1 <= index <= len(posts):
+                return posts[index - 1]
+        matches = [path for path in posts if value in path.name]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            print("匹配到多个文件，请输入更完整的文件名。")
+            continue
+        print("没有找到这篇文章。")
+
+
+def update_post_meta_interactive():
+    path = choose_post_file()
+    text = path.read_text(encoding="utf-8-sig")
+    raw_meta, body = parse_simple_front_matter(text)
+    existing = normalize_existing_meta(raw_meta)
+    meta = ask_post_meta(existing)
+    path.write_text(f"{build_front_matter(meta)}\n\n{body}", encoding="utf-8", newline="\n")
+    print(f"\n已更新文章配置：{path}")
+    return path
+
+
+def missing_required_meta(meta):
+    normalized = normalize_existing_meta(meta)
+    missing = []
+    if not normalized["title"].strip():
+        missing.append("title")
+    categories = [item.strip() for item in normalized["categories"] if item.strip()]
+    if not categories or categories == ["未分类"]:
+        missing.append("categories")
+    if not normalized["description"].strip():
+        missing.append("description")
+    return missing
+
+
+def ensure_publishable_posts():
+    posts = list_posts()
+    if not posts:
+        print("\n没有检测到文章文件，跳过文章配置检查。")
+        return
+
+    fixed = []
+    print("\n正在检查文章配置 title/categories/description...")
+    for path in posts:
+        text = path.read_text(encoding="utf-8-sig")
+        raw_meta, body = parse_simple_front_matter(text)
+        missing = missing_required_meta(raw_meta)
+        if not missing:
+            continue
+
+        print(f"\n文章缺少配置，发布前必须补齐：{path.name}")
+        print(f"缺少字段：{', '.join(missing)}")
+        existing = normalize_existing_meta(raw_meta)
+        meta = ask_post_meta(existing)
+        path.write_text(f"{build_front_matter(meta)}\n\n{body}", encoding="utf-8", newline="\n")
+        fixed.append(path)
+
+    if fixed:
+        print("\n已补齐以下文章配置：")
+        for path in fixed:
+            print(f"  - {path.name}")
+    else:
+        print("文章配置检查通过。")
+
+
+def choose_workflow():
+    print("\n请选择操作：")
+    print("  1  新建文章，只创建 Markdown 文件，不发布")
+    print("  2  发布已有改动到仓库")
+    print("  3  修改已有文章配置，只修改文件，不发布")
+    print("  4  修改已有文章配置，并发布到仓库")
+    print("  5  退出")
+
+    while True:
+        choice = input("\n请输入选项 1/2/3/4/5：").strip()
+        if choice in {"1", "2", "3", "4", "5"}:
+            return choice
+        print("请输入 1、2、3、4 或 5。")
 
 
 def find_npm():
@@ -157,6 +410,22 @@ def main():
     print(f"博客目录：{BLOG_DIR}")
     safe_dir = str(BLOG_DIR).replace("\\", "/")
     run(["git", "config", "--global", "--add", "safe.directory", safe_dir], check=False)
+
+    workflow = choose_workflow()
+    if workflow == "1":
+        create_post_interactive()
+        print("\n文章文件已创建。脚本已结束，没有提交，也没有推送。")
+        return
+    if workflow == "3":
+        update_post_meta_interactive()
+        print("\n文章配置已更新。脚本已结束，没有提交，也没有推送。")
+        return
+    if workflow == "4":
+        update_post_meta_interactive()
+    if workflow == "5":
+        raise SystemExit("已取消。")
+
+    ensure_publishable_posts()
 
     files = get_changed_files()
     if not files:
