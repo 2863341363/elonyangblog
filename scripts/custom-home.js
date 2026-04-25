@@ -107,7 +107,11 @@ hexo.extend.generator.register('custom-home', function(locals) {
         <section class="feature-card">
           <div class="feature-meta">
             <span id="feature-date">${escapeHtml(postData[0]?.date || '')}</span>
-            <span id="feature-position">${postData.length ? `1 / ${postData.length}` : '0 / 0'}</span>
+            <div class="feature-controls">
+              <button class="feature-arrow" id="feature-prev" type="button" aria-label="上一篇">‹</button>
+              <span id="feature-position">${postData.length ? `1 / ${postData.length}` : '0 / 0'}</span>
+              <button class="feature-arrow" id="feature-next" type="button" aria-label="下一篇">›</button>
+            </div>
           </div>
           <h2 id="feature-title">${escapeHtml(postData[0]?.title || '暂无文章')}</h2>
           <p id="feature-excerpt">${escapeHtml(postData[0]?.excerpt || '写下第一篇文章后，它会出现在这里。')}</p>
@@ -127,6 +131,8 @@ hexo.extend.generator.register('custom-home', function(locals) {
     const position = document.getElementById('feature-position');
     const excerpt = document.getElementById('feature-excerpt');
     const link = document.getElementById('feature-link');
+    const prev = document.getElementById('feature-prev');
+    const next = document.getElementById('feature-next');
     const buttons = Array.from(document.querySelectorAll('.post-link'));
     const shell = document.querySelector('.desktop');
     const toggle = document.querySelector('.sidebar-handle');
@@ -161,6 +167,16 @@ hexo.extend.generator.register('custom-home', function(locals) {
         render(index);
         startTimer();
       });
+    });
+
+    prev.addEventListener('click', () => {
+      render(active - 1);
+      startTimer();
+    });
+
+    next.addEventListener('click', () => {
+      render(active + 1);
+      startTimer();
     });
 
     toggle.addEventListener('click', () => {

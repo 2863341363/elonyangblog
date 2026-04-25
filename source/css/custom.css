@@ -130,3 +130,17 @@ figure.highlight .code pre {
 .highlight .name {
   color: #1d4ed8 !important;
 }
+
+#navbar.fixed-top,
+.navbar.fixed-top,
+.scrolling-navbar {
+  position: absolute !important;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+#navbar.navbar-col-show,
+#navbar.navbar-col-hide {
+  position: absolute !important;
+}

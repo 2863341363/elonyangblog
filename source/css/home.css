@@ -304,9 +304,37 @@ a {
 .feature-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 20px;
   color: var(--muted);
   font-size: 14px;
+}
+
+.feature-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feature-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #cfd9e2;
+  border-radius: 999px;
+  color: #1f5060;
+  background: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.feature-arrow:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
 .feature-card h2 {
