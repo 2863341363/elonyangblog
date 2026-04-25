@@ -262,7 +262,66 @@ body:has(a:hover, button:hover, input:hover) .cursor-dot {
 }
 
 .posts-page {
-  padding: 42px 0 44px;
+  padding: 34px 0 44px;
+}
+
+.posts-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 430px;
+  gap: 54px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.posts-intro {
+  position: relative;
+  padding-top: 20px;
+}
+
+.posts-intro p {
+  margin: 18px 0 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.hero-doodle {
+  position: absolute;
+  left: 274px;
+  top: 38px;
+  width: 220px;
+  height: 74px;
+}
+
+.doodle-line {
+  position: absolute;
+  left: 0;
+  top: 24px;
+  width: 160px;
+  height: 42px;
+  border-top: 2px dashed #d7bda4;
+  border-radius: 50%;
+  transform: rotate(5deg);
+}
+
+.doodle-plane {
+  position: absolute;
+  right: 8px;
+  top: 2px;
+  width: 44px;
+  height: 26px;
+  background: #dfe5eb;
+  clip-path: polygon(0 48%, 100% 0, 74% 54%, 100% 100%);
+  transform: rotate(-12deg);
+}
+
+.posts-top-right {
+  display: grid;
+  gap: 18px;
+  padding-top: 12px;
+}
+
+.posts-island .mini-island {
+  height: 148px;
 }
 
 .posts-hero,
@@ -368,7 +427,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin: 26px 0 18px;
+  margin: 28px 0 0;
 }
 
 .filter-tabs a {
@@ -392,7 +451,7 @@ h1 {
 .posts-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 420px;
-  gap: 64px;
+  gap: 54px;
   align-items: start;
 }
 
@@ -406,7 +465,7 @@ h1 {
   grid-template-columns: 260px minmax(0, 1fr) 130px;
   gap: 28px;
   align-items: center;
-  min-height: 132px;
+  min-height: 136px;
   padding: 12px 18px;
   border: 1px solid #eadfce;
   border-radius: 12px;
@@ -712,11 +771,11 @@ h1 {
 }
 
 .posts-page .search-card {
-  min-height: 150px;
+  min-height: 124px;
 }
 
 .posts-page .tags-card {
-  min-height: 320px;
+  min-height: 250px;
 }
 
 .search-card label span {
@@ -812,6 +871,7 @@ h1 {
   right: 17px;
 }
 
+.profile-mini,
 .profile-card .mini-island {
   position: absolute;
   right: -4px;
@@ -824,11 +884,11 @@ h1 {
 }
 
 .posts-page .image-card {
-  min-height: 356px;
+  min-height: 288px;
 }
 
 .posts-page .subscribe-card {
-  min-height: 152px;
+  min-height: 146px;
 }
 
 .profile-card p,
@@ -1564,6 +1624,7 @@ pre {
 
 @media (max-width: 1100px) {
   .site-header,
+  .posts-top,
   .posts-layout,
   .detail-page,
   .search-layout,
@@ -1576,6 +1637,12 @@ pre {
   .site-header {
     gap: 12px;
     padding: 0 24px;
+  }
+
+  .hero-doodle {
+    position: static;
+    width: 180px;
+    margin-top: 12px;
   }
 
   .header-actions,
@@ -1636,6 +1703,7 @@ pre {
   .search-result,
   .picked-list article,
   .home-hero,
+  .posts-top,
   .posts-hero,
   .category-hero,
   .notfound-hero {

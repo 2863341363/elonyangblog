@@ -199,31 +199,34 @@ function postsPage(config, posts) {
   const chips = ['全部', '🎨 设计观察', '⌘ 开发笔记', '💡 产品思考', '♧ 生活片段', '📖 读书摘记', '⭐ 灵感收藏'];
   const hotTags = ['设计系统', 'Next.js', 'React', '产品设计', '思考', '生活', '读书', '推荐', '效率工具', '灵感', 'UI/UX', '成长'];
   const body = `<main class="page posts-page">
-    <section class="posts-hero">
-      <div>
+    <section class="posts-top">
+      <div class="posts-intro">
         <h1>全部文章</h1>
         <p>记录灵感、代码与生活，这里是我思考和成长的痕迹。</p>
+        <div class="hero-doodle"><span class="doodle-line"></span><span class="doodle-plane"></span></div>
+        <div class="filter-tabs">${chips.map((item, index) => `<a class="${index === 0 ? 'selected' : ''}" href="#">${item}</a>`).join('')}</div>
       </div>
-      ${miniIsland()}
+      <div class="posts-top-right">
+        <div class="posts-island">${miniIsland()}</div>
+        <section class="side-card search-card">
+          <h2>搜索文章</h2>
+          <label><input placeholder="输入关键词搜索..."><span></span></label>
+        </section>
+      </div>
     </section>
-    <div class="filter-tabs">${chips.map((item, index) => `<a class="${index === 0 ? 'selected' : ''}" href="#">${item}</a>`).join('')}</div>
     <div class="posts-layout">
       <section class="post-list">
         ${posts.map(articleRow).join('')}
         <div class="pager"><a>‹</a><a class="current">1</a><a>2</a><a>3</a><a>4</a><span>...</span><a>10</a><a>›</a></div>
       </section>
       <aside class="side-stack">
-        <section class="side-card search-card">
-          <h2>搜索文章</h2>
-          <label><input placeholder="输入关键词搜索..."><span></span></label>
-        </section>
         <section class="side-card tags-card">
           <h2>热门标签</h2>
           <div class="tag-cloud">${hotTags.map((item, index) => tag(item, `tone-${(index % 6) + 1}`)).join('')}</div>
           <a class="more-link" href="/tags/">更多 →</a>
         </section>
         <section class="profile-card image-card">
-          <div class="profile-art"><span class="avatar-boy"><i></i><b></b></span>${miniIsland()}</div>
+          <div class="profile-art"><span class="avatar-boy"><i></i><b></b></span><div class="mini-island profile-mini" aria-hidden="true"><span class="mi-cloud one"></span><span class="mi-cloud two"></span><span class="mi-star a">✦</span><span class="mi-plane"></span><span class="mi-land"></span><span class="mi-light"></span></div></div>
           <h2>ElonYang</h2>
           <p>记录灵感、代码与生活。</p>
           <div class="socials"><span>GitHub</span><span>Email</span><span>X</span></div>
