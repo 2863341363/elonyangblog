@@ -21,7 +21,7 @@ elonyangblog.ccwu.cc
 To publish updates:
 
 ```powershell
-cd C:\Users\ElonZhong\blog
+cd D:\blog
 git add .
 git commit -m "Update blog"
 git push
