@@ -24,6 +24,33 @@ function plainExcerpt(post) {
     .slice(0, 140);
 }
 
+function collectionNames(collection) {
+  if (!collection) return [];
+
+  const items = typeof collection.toArray === 'function'
+    ? collection.toArray()
+    : Array.isArray(collection)
+      ? collection
+      : [];
+
+  return items
+    .map(item => {
+      if (typeof item === 'string') return item;
+      return item.name || item.slug || item.title || '';
+    })
+    .filter(Boolean);
+}
+
+function postGroups(post) {
+  const categories = collectionNames(post.categories);
+  if (categories.length) return categories;
+
+  const tags = collectionNames(post.tags);
+  if (tags.length) return tags;
+
+  return ['未分类'];
+}
+
 hexo.extend.generator.register('custom-home', function(locals) {
   const config = this.config;
   const posts = locals.posts
@@ -35,8 +62,17 @@ hexo.extend.generator.register('custom-home', function(locals) {
     title: post.title || post.slug || '未命名文章',
     date: formatDate(post.date),
     path: `/${post.path}`,
-    excerpt: plainExcerpt(post) || '这篇文章暂时还没有摘要，点进去看看完整内容。'
+    excerpt: plainExcerpt(post) || '这篇文章暂时还没有摘要，点进去看看完整内容。',
+    groups: postGroups(post)
   }));
+
+  const groupMap = new Map();
+  postData.forEach(post => {
+    post.groups.forEach(group => {
+      if (!groupMap.has(group)) groupMap.set(group, []);
+      groupMap.get(group).push(post);
+    });
+  });
 
   const postItems = postData.map((post, index) => `
     <li>
@@ -45,6 +81,20 @@ hexo.extend.generator.register('custom-home', function(locals) {
         <small>${escapeHtml(post.date)}</small>
       </button>
     </li>`).join('');
+
+  const groupCards = Array.from(groupMap.entries()).map(([group, items]) => `
+    <article class="group-card">
+      <div class="group-card-top">
+        <h3>${escapeHtml(group)}</h3>
+        <span>${items.length} 个文件</span>
+      </div>
+      <ul>
+        ${items.map(item => `
+          <li>
+            <a href="${escapeHtml(item.path)}">${escapeHtml(item.title)}</a>
+          </li>`).join('')}
+      </ul>
+    </article>`).join('');
 
   const html = `<!doctype html>
 <html lang="zh-CN">
@@ -116,6 +166,17 @@ hexo.extend.generator.register('custom-home', function(locals) {
           <h2 id="feature-title">${escapeHtml(postData[0]?.title || '暂无文章')}</h2>
           <p id="feature-excerpt">${escapeHtml(postData[0]?.excerpt || '写下第一篇文章后，它会出现在这里。')}</p>
           <a id="feature-link" class="button" href="${escapeHtml(postData[0]?.path || '/posts/')}">阅读这篇</a>
+        </section>
+
+        <section class="group-panel">
+          <div class="group-heading">
+            <p class="eyebrow">File Groups</p>
+            <h2>上传文件分组</h2>
+            <p>同一种类型的文章会自动归到一起。给 Markdown 文件添加 categories 或 tags 后，这里会跟着更新。</p>
+          </div>
+          <div class="group-grid">
+            ${groupCards || '<article class="group-card empty-group">暂无分组</article>'}
+          </div>
         </section>
       </section>
     </section>
