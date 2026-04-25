@@ -5,7 +5,7 @@ favicon: /img/fluid.png
 apple_touch_icon: /img/fluid.png
 
 navbar:
-  blog_title: "ElonYang 的博客"
+  blog_title: "ElonYang的博客"
   ground_glass:
     enable: false
   menu:
@@ -16,7 +16,7 @@ navbar:
     - { key: "关于", link: "/about/", icon: "iconfont icon-user-fill" }
 
 search:
-  enable: false
+  enable: true
 
 index:
   banner_img:
@@ -41,6 +41,12 @@ post:
     expand_all: true
   copyright:
     enable: false
+  like:
+    enable: true
+    app_id: # 请设置LeanCloud App ID
+    app_key: # 请设置LeanCloud App Key
+  share:
+    enable: true
 
 archive:
   banner_img:
@@ -59,6 +65,11 @@ tag:
 
 footer:
   content: 'Powered by <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> and <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>'
+
+dark_mode:
+  enable: true
+  default: light
+  switch: true
 
 custom_css:
   - /css/custom.css

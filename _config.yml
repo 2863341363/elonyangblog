@@ -2,11 +2,11 @@
 # Docs: https://hexo.io/docs/configuration.html
 
 # Site
-title: ElonYang 的博客
-subtitle: 在柔软的小岛上，记录灵感、代码与生活
-description: ElonYang 的个人博客，记录设计观察、开发笔记、产品思考和日常片段
-keywords: ElonYang, blog, personal blog, programming, design, product
-author: ElonYang
+title: ElonYang的博客
+subtitle: 版权归ElonYang
+description: 风格简洁，美观整齐
+keywords: 简洁、美观、整齐、博客、个人网站
+author: 杨忠
 language: zh-CN
 timezone: Asia/Shanghai
 
