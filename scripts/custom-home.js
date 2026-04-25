@@ -90,22 +90,29 @@ hexo.extend.generator.register('custom-home', function(locals) {
         </nav>
       </header>
 
-      <section class="intro-panel">
-        <p class="eyebrow">ElonYang's Blog</p>
-        <h1>把零散的学习，整理成清晰的路线。</h1>
-        <p>
-          这个博客用来存放学习路线、技术笔记、工具配置和项目部署记录。左侧会动态列出所有文章，点击文章名可以在这里预览，再进入完整内容。
-        </p>
-      </section>
+      <section class="home-grid">
+        <section class="intro-panel">
+          <p class="eyebrow">ElonYang's Blog</p>
+          <h1>把学习记录整理成清晰路线</h1>
+          <p>
+            这里用来沉淀学习路线、技术笔记、工具配置和项目部署记录。左侧列出全部文章，点击文章名可以预览，再进入完整内容。
+          </p>
+          <div class="intro-stats">
+            <span><strong>${postData.length}</strong> 篇文章</span>
+            <span>GitHub 自动部署</span>
+            <span>Cloudflare Pages</span>
+          </div>
+        </section>
 
-      <section class="feature-card">
-        <div class="feature-meta">
-          <span id="feature-date">${escapeHtml(postData[0]?.date || '')}</span>
-          <span id="feature-position">${postData.length ? `1 / ${postData.length}` : '0 / 0'}</span>
-        </div>
-        <h2 id="feature-title">${escapeHtml(postData[0]?.title || '暂无文章')}</h2>
-        <p id="feature-excerpt">${escapeHtml(postData[0]?.excerpt || '写下第一篇文章后，它会出现在这里。')}</p>
-        <a id="feature-link" class="button" href="${escapeHtml(postData[0]?.path || '/posts/')}">阅读这篇</a>
+        <section class="feature-card">
+          <div class="feature-meta">
+            <span id="feature-date">${escapeHtml(postData[0]?.date || '')}</span>
+            <span id="feature-position">${postData.length ? `1 / ${postData.length}` : '0 / 0'}</span>
+          </div>
+          <h2 id="feature-title">${escapeHtml(postData[0]?.title || '暂无文章')}</h2>
+          <p id="feature-excerpt">${escapeHtml(postData[0]?.excerpt || '写下第一篇文章后，它会出现在这里。')}</p>
+          <a id="feature-link" class="button" href="${escapeHtml(postData[0]?.path || '/posts/')}">阅读这篇</a>
+        </section>
       </section>
     </section>
   </main>
