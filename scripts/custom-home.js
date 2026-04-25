@@ -75,11 +75,13 @@ hexo.extend.generator.register('custom-home', function(locals) {
     </aside>
 
     <section class="workspace">
+      <button class="sidebar-handle" type="button" aria-label="收起侧边栏" aria-expanded="true">
+        <span aria-hidden="true">‹</span>
+      </button>
       <header class="topbar">
         <div class="window-dots" aria-hidden="true">
           <span></span><span></span><span></span>
         </div>
-        <button class="sidebar-toggle" type="button" aria-expanded="true">☰ 文章侧栏</button>
         <div class="hero-title">记录学习、技术和生活</div>
         <nav class="nav">
           <a href="/posts/">文章</a>
@@ -120,12 +122,13 @@ hexo.extend.generator.register('custom-home', function(locals) {
     const link = document.getElementById('feature-link');
     const buttons = Array.from(document.querySelectorAll('.post-link'));
     const shell = document.querySelector('.desktop');
-    const toggle = document.querySelector('.sidebar-toggle');
+    const toggle = document.querySelector('.sidebar-handle');
 
     function setSidebarCollapsed(collapsed) {
       shell.classList.toggle('sidebar-collapsed', collapsed);
       toggle.setAttribute('aria-expanded', String(!collapsed));
-      toggle.textContent = collapsed ? '☰ 打开侧栏' : '☰ 收起侧栏';
+      toggle.setAttribute('aria-label', collapsed ? '打开侧边栏' : '收起侧边栏');
+      toggle.querySelector('span').textContent = collapsed ? '›' : '‹';
       localStorage.setItem('home-sidebar-collapsed', collapsed ? '1' : '0');
     }
 

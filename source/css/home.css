@@ -136,12 +136,14 @@ a {
 }
 
 .workspace {
+  position: relative;
   padding: 30px clamp(22px, 5vw, 72px) 56px;
+  transition: padding-left 0.22s ease;
 }
 
 .topbar {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   min-height: 64px;
   overflow: hidden;
@@ -171,21 +173,40 @@ a {
   background: #ef7f7f;
 }
 
-.sidebar-toggle {
-  min-height: 34px;
-  margin-left: 18px;
-  padding: 0 12px;
+.sidebar-handle {
+  position: fixed;
+  z-index: 20;
+  top: 50%;
+  left: 318px;
+  width: 44px;
+  height: 76px;
+  transform: translateY(-50%);
   border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 6px;
-  color: #f8fbff;
-  background: rgba(255, 255, 255, 0.1);
-  font: inherit;
+  border-left: 0;
+  border-radius: 0 14px 14px 0;
+  color: #fff;
+  background: #172536;
+  box-shadow: 0 14px 32px rgba(20, 34, 49, 0.22);
   cursor: pointer;
-  white-space: nowrap;
+  transition: left 0.22s ease, background 0.18s ease, transform 0.18s ease;
 }
 
-.sidebar-toggle:hover {
-  background: rgba(255, 255, 255, 0.18);
+.sidebar-handle span {
+  display: block;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.sidebar-handle:hover {
+  background: #1f3a52;
+}
+
+.desktop.sidebar-collapsed .sidebar-handle {
+  left: 0;
+}
+
+.desktop.sidebar-collapsed .workspace {
+  padding-left: clamp(56px, 7vw, 92px);
 }
 
 .hero-title {
@@ -296,10 +317,24 @@ a {
   }
 
   .window-dots,
-  .sidebar-toggle,
   .nav {
     padding: 0 22px;
     margin-left: 0;
+  }
+
+  .sidebar-handle {
+    top: auto;
+    bottom: 18px;
+    left: 18px;
+    width: 52px;
+    height: 52px;
+    transform: none;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+  }
+
+  .desktop.sidebar-collapsed .sidebar-handle {
+    left: 18px;
   }
 
   .hero-title {
