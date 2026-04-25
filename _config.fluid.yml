@@ -1,0 +1,59 @@
+# Fluid theme configuration
+# Full reference: node_modules/hexo-theme-fluid/_config.yml
+
+favicon: /img/fluid.png
+apple_touch_icon: /img/fluid.png
+
+navbar:
+  blog_title: "ElonYang的博客"
+  ground_glass:
+    enable: true
+    px: 4
+    alpha: 0.72
+  menu:
+    - { key: "首页", link: "/", icon: "iconfont icon-home-fill" }
+    - { key: "归档", link: "/archives/", icon: "iconfont icon-archive-fill" }
+    - { key: "关于", link: "/about/", icon: "iconfont icon-user-fill" }
+
+search:
+  enable: false
+
+index:
+  banner_img: /img/default.png
+  banner_img_height: 55
+  banner_mask_alpha: 0.35
+  slogan:
+    enable: true
+    text: "记录学习、技术和生活"
+  auto_excerpt:
+    enable: true
+  post_meta:
+    date: true
+    category: true
+    tag: true
+
+post:
+  banner_img: /img/default.png
+  banner_img_height: 45
+  banner_mask_alpha: 0.35
+  toc:
+    enable: true
+    expand_all: true
+  copyright:
+    enable: false
+
+archive:
+  banner_img: /img/default.png
+  banner_img_height: 40
+  banner_mask_alpha: 0.35
+
+category:
+  enable: true
+  banner_img: /img/default.png
+
+tag:
+  enable: true
+  banner_img: /img/default.png
+
+footer:
+  content: 'Powered by <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> and <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>'

@@ -2,6 +2,12 @@
 
 这是一个 Hexo 博客项目，源码托管在 GitHub，并通过 Cloudflare Pages 自动部署。
 
+当前主题：
+
+```text
+hexo-theme-fluid
+```
+
 ## 本地目录
 
 博客项目目录：
