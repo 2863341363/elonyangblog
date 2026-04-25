@@ -1,10 +1,19 @@
+import locale
+import os
 import subprocess
 import sys
-import locale
 from pathlib import Path
 
 
 BLOG_DIR = Path(__file__).resolve().parent
+
+
+def configure_console():
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
 
 
 def decode_output(data):
@@ -129,6 +138,7 @@ def ask_commit_message():
 
 
 def main():
+    configure_console()
     print(f"博客目录：{BLOG_DIR}")
     safe_dir = str(BLOG_DIR).replace("\\", "/")
     run(["git", "config", "--global", "--add", "safe.directory", safe_dir], check=False)
@@ -171,9 +181,29 @@ def main():
     print(f"\n发布完成，提交编号：{commit}。Cloudflare Pages 会自动部署。")
 
 
+def wait_before_exit():
+    if os.name != "nt":
+        return
+    try:
+        input("\n按回车键退出...")
+    except EOFError:
+        pass
+
+
 if __name__ == "__main__":
+    exit_code = 0
     try:
         main()
     except KeyboardInterrupt:
         print("\n已取消。")
-        sys.exit(130)
+        exit_code = 130
+    except SystemExit as error:
+        if error.code not in (None, 0):
+            print(f"\n{error}")
+        exit_code = error.code if isinstance(error.code, int) else 1
+    except Exception as error:
+        print(f"\n发生错误：{error}")
+        exit_code = 1
+    finally:
+        wait_before_exit()
+    sys.exit(exit_code)
