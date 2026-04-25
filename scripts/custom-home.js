@@ -223,7 +223,7 @@ function postsPage(config, posts) {
           <a class="more-link" href="/tags/">更多 →</a>
         </section>
         <section class="profile-card image-card">
-          <div class="profile-art"><span class="avatar-boy"></span>${miniIsland()}</div>
+          <div class="profile-art"><span class="avatar-boy"><i></i><b></b></span>${miniIsland()}</div>
           <h2>ElonYang</h2>
           <p>记录灵感、代码与生活。</p>
           <div class="socials"><span>GitHub</span><span>Email</span><span>X</span></div>

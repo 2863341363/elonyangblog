@@ -391,8 +391,8 @@ h1 {
 
 .posts-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 430px;
-  gap: 66px;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 64px;
   align-items: start;
 }
 
@@ -667,6 +667,7 @@ h1 {
 .side-stack {
   display: grid;
   gap: 22px;
+  align-self: start;
 }
 
 .side-card,
@@ -681,7 +682,7 @@ h1 {
 }
 
 .side-card {
-  padding: 28px;
+  padding: 28px 30px;
 }
 
 .side-card h2,
@@ -710,6 +711,14 @@ h1 {
   background: rgba(255, 253, 248, 0.8);
 }
 
+.posts-page .search-card {
+  min-height: 150px;
+}
+
+.posts-page .tags-card {
+  min-height: 320px;
+}
+
 .search-card label span {
   position: absolute;
   right: 18px;
@@ -735,14 +744,16 @@ h1 {
 }
 
 .profile-card {
-  padding: 32px 28px;
+  padding: 28px 28px 30px;
   text-align: center;
-  background: linear-gradient(180deg, rgba(255, 240, 201, 0.45), rgba(255, 255, 255, 0.86));
+  background:
+    radial-gradient(circle at 22% 28%, rgba(255, 255, 255, 0.72), transparent 22%),
+    linear-gradient(180deg, rgba(255, 236, 188, 0.58), rgba(255, 255, 255, 0.86));
 }
 
 .profile-art {
   position: relative;
-  height: 98px;
+  height: 126px;
 }
 
 .avatar-boy,
@@ -757,14 +768,67 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.image-card .avatar-boy {
+  position: relative;
+  z-index: 2;
+  width: 96px;
+  height: 96px;
+  border: 4px solid #fff;
+  background:
+    radial-gradient(circle at 36px 42px, #20242c 0 4px, transparent 5px),
+    radial-gradient(circle at 60px 42px, #20242c 0 4px, transparent 5px),
+    radial-gradient(circle at 48px 58px, #ef9f8d 0 7px, transparent 8px),
+    radial-gradient(ellipse at 50% 35%, #4b3328 0 34px, transparent 35px),
+    radial-gradient(circle at 50% 48%, #ffd6bd 0 40px, transparent 41px),
+    linear-gradient(#77aee0 64%, #5e9ed4 65%);
+}
+
+.image-card .avatar-boy::before {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 64px;
+  width: 34px;
+  height: 15px;
+  border-bottom: 3px solid #73473d;
+  border-radius: 0 0 999px 999px;
+}
+
+.image-card .avatar-boy i,
+.image-card .avatar-boy b {
+  position: absolute;
+  top: 52px;
+  width: 12px;
+  height: 6px;
+  border-radius: 999px;
+  background: #f6a79a;
+}
+
+.image-card .avatar-boy i {
+  left: 17px;
+}
+
+.image-card .avatar-boy b {
+  right: 17px;
+}
+
 .profile-card .mini-island {
   position: absolute;
-  right: 14px;
-  top: 4px;
+  right: -4px;
+  top: 18px;
   width: 150px;
   height: 70px;
-  transform: scale(0.48);
+  opacity: 0.92;
+  transform: scale(0.52);
   transform-origin: top right;
+}
+
+.posts-page .image-card {
+  min-height: 356px;
+}
+
+.posts-page .subscribe-card {
+  min-height: 152px;
 }
 
 .profile-card p,
@@ -1498,7 +1562,7 @@ pre {
   text-align: center;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1100px) {
   .site-header,
   .posts-layout,
   .detail-page,
