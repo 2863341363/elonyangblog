@@ -21,7 +21,7 @@ function plainExcerpt(post) {
     .replace(/<[^>]*>/g, '')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 140);
+    .slice(0, 110);
 }
 
 function collectionNames(collection) {
@@ -41,14 +41,41 @@ function collectionNames(collection) {
     .filter(Boolean);
 }
 
-function postGroups(post) {
-  const categories = collectionNames(post.categories);
-  if (categories.length) return categories;
+function primaryCategory(post) {
+  return collectionNames(post.categories)[0] || collectionNames(post.tags)[0] || '随笔';
+}
 
+function tagsFor(post) {
   const tags = collectionNames(post.tags);
-  if (tags.length) return tags;
+  return tags.length ? tags.slice(0, 3) : [primaryCategory(post)];
+}
 
-  return ['未分类'];
+function readingTime(post) {
+  const raw = String(post.raw || post.content || '');
+  const words = raw.replace(/<[^>]*>/g, '').replace(/\s+/g, '').length;
+  return Math.max(1, Math.ceil(words / 450));
+}
+
+function articleCard(post, index, variant) {
+  const tags = post.tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join('');
+  return `
+    <article class="article-card ${variant || ''}">
+      <a class="article-visual sticker-${(index % 6) + 1}" href="${escapeHtml(post.path)}" aria-label="阅读 ${escapeHtml(post.title)}">
+        <span class="visual-sun"></span>
+        <span class="visual-book"></span>
+        <span class="visual-plane"></span>
+      </a>
+      <div class="article-body">
+        <div class="article-meta">
+          <span>${escapeHtml(post.category)}</span>
+          <span>${escapeHtml(post.date)}</span>
+          <span>${post.minutes} 分钟</span>
+        </div>
+        <h3><a href="${escapeHtml(post.path)}">${escapeHtml(post.title)}</a></h3>
+        <p>${escapeHtml(post.excerpt)}</p>
+        <div class="tag-row">${tags}</div>
+      </div>
+    </article>`;
 }
 
 hexo.extend.generator.register('custom-home', function(locals) {
@@ -56,197 +83,223 @@ hexo.extend.generator.register('custom-home', function(locals) {
   const posts = locals.posts
     .sort('-date')
     .filter(post => post.published !== false)
-    .toArray();
+    .toArray()
+    .map(post => ({
+      title: post.title || post.slug || '未命名文章',
+      date: formatDate(post.date),
+      path: `/${post.path}`,
+      excerpt: plainExcerpt(post) || '这篇文章暂时还没有摘要，点进去看看完整内容。',
+      category: primaryCategory(post),
+      tags: tagsFor(post),
+      minutes: readingTime(post)
+    }));
 
-  const postData = posts.map(post => ({
-    title: post.title || post.slug || '未命名文章',
-    date: formatDate(post.date),
-    path: `/${post.path}`,
-    excerpt: plainExcerpt(post) || '这篇文章暂时还没有摘要，点进去看看完整内容。',
-    groups: postGroups(post)
-  }));
+  const fallbackPosts = [
+    {
+      title: '在柔软的小岛上，记录灵感、代码与生活',
+      date: '2026-04-25',
+      path: '/posts/',
+      excerpt: '这里会沉淀设计观察、开发笔记、产品思考，以及一些慢慢变亮的日常。',
+      category: '生活片段',
+      tags: ['灵感', '日常', '博客'],
+      minutes: 3
+    },
+    {
+      title: '给个人博客设计一套稳定的内容结构',
+      date: '2026-04-25',
+      path: '/posts/',
+      excerpt: '从分类、标签、摘要和阅读动线开始，让每篇笔记都能被重新发现。',
+      category: '产品思考',
+      tags: ['信息架构', '博客', '效率'],
+      minutes: 5
+    },
+    {
+      title: '让界面保持可爱，但不影响阅读',
+      date: '2026-04-25',
+      path: '/posts/',
+      excerpt: '用轻卡通插画、低饱和配色和清晰排版，把亲和力放在正确的位置。',
+      category: '设计观察',
+      tags: ['UI/UX', '视觉', '卡通'],
+      minutes: 4
+    }
+  ];
 
-  const groupMap = new Map();
-  postData.forEach(post => {
-    post.groups.forEach(group => {
-      if (!groupMap.has(group)) groupMap.set(group, []);
-      groupMap.get(group).push(post);
-    });
-  });
+  const articles = posts.length ? posts : fallbackPosts;
+  const featured = articles.slice(0, 3);
+  const latest = articles.slice(0, 6);
+  const categories = ['设计观察', '开发笔记', '产品思考', '生活片段', '读书摘记', '灵感收藏'];
+  const categoryCards = categories.map((name, index) => {
+    const count = articles.filter(post => post.category === name || post.tags.includes(name)).length;
+    const descriptions = {
+      '设计观察': '记录界面、体验和视觉判断。',
+      '开发笔记': '整理工程实践与问题解决。',
+      '产品思考': '把想法变成可执行的结构。',
+      '生活片段': '收藏日常里轻轻发亮的部分。',
+      '读书摘记': '留下阅读时真正击中的句子。',
+      '灵感收藏': '把零散灵感放进一个小抽屉。'
+    };
 
-  const postItems = postData.map((post, index) => `
-    <li>
-      <button class="post-link" type="button" data-index="${index}">
-        <span>${escapeHtml(post.title)}</span>
-        <small>${escapeHtml(post.date)}</small>
-      </button>
-    </li>`).join('');
-
-  const groupCards = Array.from(groupMap.entries()).map(([group, items]) => `
-    <article class="group-card">
-      <div class="group-card-top">
-        <h3>${escapeHtml(group)}</h3>
-        <span>${items.length} 个文件</span>
-      </div>
-      <ul>
-        ${items.map(item => `
-          <li>
-            <a href="${escapeHtml(item.path)}">${escapeHtml(item.title)}</a>
-          </li>`).join('')}
-      </ul>
-    </article>`).join('');
+    return `
+      <a class="category-card" href="/categories/">
+        <span class="category-icon icon-${index + 1}"></span>
+        <strong>${escapeHtml(name)}</strong>
+        <small>${count || Math.max(1, index + 1)} 篇</small>
+        <p>${escapeHtml(descriptions[name])}</p>
+      </a>`;
+  }).join('');
 
   const html = `<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(config.title)}</title>
+  <title>${escapeHtml(config.title || 'ElonYang 的博客')}</title>
   <meta name="description" content="${escapeHtml(config.description || config.subtitle || '')}">
   <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-  <main class="desktop">
-    <aside class="sidebar">
-      <a class="brand" href="/">ElonYang</a>
-      <p class="tagline">记录学习、技术和生活</p>
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="click-layer" aria-hidden="true"></div>
 
-      <div class="article-count">
-        <strong>${postData.length}</strong>
-        <span>篇文章</span>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ElonYang 的博客首页">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>ElonYang 的博客</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="/">首页</a>
+      <a href="/posts/">文章</a>
+      <a href="/categories/">分类</a>
+      <a href="/about/">关于</a>
+    </nav>
+    <div class="header-actions">
+      <a class="icon-button" href="/posts/" aria-label="搜索文章">⌕</a>
+      <button class="icon-button theme-toggle" type="button" aria-label="切换暖夜模式">◐</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <div class="hero-copy">
+        <p class="eyebrow">Personal notes by ElonYang</p>
+        <h1>在柔软的小岛上，记录灵感、代码与生活。</h1>
+        <p class="hero-text">这里收集设计观察、开发笔记、产品思考和一些慢慢变亮的日常。所有内容都来自 ElonYang 的个人沉淀。</p>
+        <div class="hero-actions">
+          <a class="button primary" href="/posts/">开始阅读</a>
+          <a class="button secondary" href="/categories/">看看分类</a>
+        </div>
       </div>
 
-      <section class="article-list">
-        <h2>所有文章</h2>
-        <ul>
-          ${postItems || '<li class="empty">暂无文章</li>'}
-        </ul>
-      </section>
-    </aside>
-
-    <section class="workspace">
-      <button class="sidebar-handle" type="button" aria-label="收起侧边栏" aria-expanded="true">
-        <span aria-hidden="true">‹</span>
-      </button>
-      <header class="topbar">
-        <div class="window-dots" aria-hidden="true">
-          <span></span><span></span><span></span>
+      <div class="island-scene" aria-label="卡通小岛插画">
+        <span class="cloud cloud-a"></span>
+        <span class="cloud cloud-b"></span>
+        <span class="star star-a">✦</span>
+        <span class="star star-b">✧</span>
+        <span class="plane"></span>
+        <div class="island">
+          <span class="island-face"></span>
+          <span class="tree"></span>
+          <span class="book"></span>
+          <span class="coffee"></span>
         </div>
-        <div class="hero-title">记录学习、技术和生活</div>
-        <nav class="nav">
-          <a href="/posts/">文章</a>
-          <a href="/archives/">归档</a>
-          <a href="/about/">关于</a>
-        </nav>
-      </header>
+      </div>
+    </section>
 
-      <section class="home-grid">
-        <section class="intro-panel">
-          <p class="eyebrow">ElonYang's Blog</p>
-          <h1>把学习记录整理成清晰路线</h1>
-          <p>
-            这里用来沉淀学习路线、技术笔记、工具配置和项目部署记录。左侧列出全部文章，点击文章名可以预览，再进入完整内容。
-          </p>
-          <div class="intro-stats">
-            <span><strong>${postData.length}</strong> 篇文章</span>
-            <span>GitHub 自动部署</span>
-            <span>Cloudflare Pages</span>
+    <section class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Featured</p>
+        <h2>精选文章</h2>
+        <a href="/posts/">查看全部</a>
+      </div>
+      <div class="featured-grid">
+        ${featured.map((post, index) => articleCard(post, index, 'featured')).join('')}
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="latest-column">
+        <div class="section-heading compact">
+          <p class="eyebrow">Latest</p>
+          <h2>最新文章</h2>
+        </div>
+        <div class="latest-list">
+          ${latest.map((post, index) => articleCard(post, index + 3, 'list')).join('')}
+        </div>
+      </div>
+
+      <aside class="profile-column">
+        <section class="profile-card">
+          <div class="avatar" aria-hidden="true">E</div>
+          <h2>你好，我是 ElonYang</h2>
+          <p>我在这里记录学习路线、技术笔记、产品思考和日常观察。希望这些笔记以后还能照亮自己，也偶尔帮到路过的人。</p>
+          <div class="profile-links">
+            <a href="/about/">关于我</a>
+            <a href="/archives/">归档</a>
           </div>
         </section>
 
-        <section class="feature-card">
-          <div class="feature-meta">
-            <span id="feature-date">${escapeHtml(postData[0]?.date || '')}</span>
-            <div class="feature-controls">
-              <button class="feature-arrow" id="feature-prev" type="button" aria-label="上一篇">‹</button>
-              <span id="feature-position">${postData.length ? `1 / ${postData.length}` : '0 / 0'}</span>
-              <button class="feature-arrow" id="feature-next" type="button" aria-label="下一篇">›</button>
-            </div>
-          </div>
-          <h2 id="feature-title">${escapeHtml(postData[0]?.title || '暂无文章')}</h2>
-          <p id="feature-excerpt">${escapeHtml(postData[0]?.excerpt || '写下第一篇文章后，它会出现在这里。')}</p>
-          <a id="feature-link" class="button" href="${escapeHtml(postData[0]?.path || '/posts/')}">阅读这篇</a>
+        <section class="subscribe-card">
+          <p class="eyebrow">Subscribe</p>
+          <h2>把新文章放进你的收件箱</h2>
+          <form>
+            <input type="email" placeholder="your@email.com" aria-label="邮箱地址">
+            <button type="submit">订阅</button>
+          </form>
         </section>
+      </aside>
+    </section>
 
-        <section class="group-panel">
-          <div class="group-heading">
-            <p class="eyebrow">File Groups</p>
-            <h2>上传文件分组</h2>
-            <p>同一种类型的文章会自动归到一起。给 Markdown 文件添加 categories 或 tags 后，这里会跟着更新。</p>
-          </div>
-          <div class="group-grid">
-            ${groupCards || '<article class="group-card empty-group">暂无分组</article>'}
-          </div>
-        </section>
-      </section>
+    <section class="section-block">
+      <div class="section-heading">
+        <p class="eyebrow">Explore</p>
+        <h2>分类入口</h2>
+        <a href="/categories/">全部分类</a>
+      </div>
+      <div class="category-grid">
+        ${categoryCards}
+      </div>
     </section>
   </main>
 
+  <footer class="site-footer">
+    <span>© ${new Date().getFullYear()} ElonYang 的博客</span>
+    <span>优雅阅读，轻卡通表达。</span>
+  </footer>
+
   <script>
-    const posts = ${JSON.stringify(postData)};
-    let active = 0;
-    let timer = null;
+    const root = document.documentElement;
+    const cursor = document.querySelector('.cursor-dot');
+    const clickLayer = document.querySelector('.click-layer');
+    const themeToggle = document.querySelector('.theme-toggle');
 
-    const title = document.getElementById('feature-title');
-    const date = document.getElementById('feature-date');
-    const position = document.getElementById('feature-position');
-    const excerpt = document.getElementById('feature-excerpt');
-    const link = document.getElementById('feature-link');
-    const prev = document.getElementById('feature-prev');
-    const next = document.getElementById('feature-next');
-    const buttons = Array.from(document.querySelectorAll('.post-link'));
-    const shell = document.querySelector('.desktop');
-    const toggle = document.querySelector('.sidebar-handle');
-
-    function setSidebarCollapsed(collapsed) {
-      shell.classList.toggle('sidebar-collapsed', collapsed);
-      toggle.setAttribute('aria-expanded', String(!collapsed));
-      toggle.setAttribute('aria-label', collapsed ? '打开侧边栏' : '收起侧边栏');
-      toggle.querySelector('span').textContent = collapsed ? '›' : '‹';
-      localStorage.setItem('home-sidebar-collapsed', collapsed ? '1' : '0');
+    function setTheme(isDark) {
+      root.classList.toggle('warm-night', isDark);
+      localStorage.setItem('ey-blog-theme', isDark ? 'warm-night' : 'light');
     }
 
-    function render(index) {
-      if (!posts.length) return;
-      active = (index + posts.length) % posts.length;
-      const post = posts[active];
-      title.textContent = post.title;
-      date.textContent = post.date;
-      position.textContent = (active + 1) + ' / ' + posts.length;
-      excerpt.textContent = post.excerpt;
-      link.href = post.path;
-      buttons.forEach((button, i) => button.classList.toggle('active', i === active));
-    }
+    setTheme(localStorage.getItem('ey-blog-theme') === 'warm-night');
 
-    function startTimer() {
-      clearInterval(timer);
-      timer = setInterval(() => render(active + 1), 5200);
-    }
-
-    buttons.forEach((button, index) => {
-      button.addEventListener('click', () => {
-        render(index);
-        startTimer();
-      });
+    themeToggle.addEventListener('click', () => {
+      setTheme(!root.classList.contains('warm-night'));
     });
 
-    prev.addEventListener('click', () => {
-      render(active - 1);
-      startTimer();
+    window.addEventListener('pointermove', event => {
+      cursor.style.transform = 'translate(' + event.clientX + 'px, ' + event.clientY + 'px)';
+    }, { passive: true });
+
+    window.addEventListener('pointerdown', event => {
+      const burst = document.createElement('span');
+      burst.className = 'click-burst';
+      burst.style.left = event.clientX + 'px';
+      burst.style.top = event.clientY + 'px';
+      clickLayer.appendChild(burst);
+      setTimeout(() => burst.remove(), 700);
     });
 
-    next.addEventListener('click', () => {
-      render(active + 1);
-      startTimer();
+    document.querySelectorAll('a, button, input').forEach(item => {
+      item.addEventListener('pointerenter', () => cursor.classList.add('is-hovering'));
+      item.addEventListener('pointerleave', () => cursor.classList.remove('is-hovering'));
     });
-
-    toggle.addEventListener('click', () => {
-      setSidebarCollapsed(!shell.classList.contains('sidebar-collapsed'));
-    });
-
-    setSidebarCollapsed(localStorage.getItem('home-sidebar-collapsed') === '1');
-    render(0);
-    startTimer();
   </script>
 </body>
 </html>`;

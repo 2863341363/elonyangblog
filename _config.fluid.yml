@@ -5,12 +5,14 @@ favicon: /img/fluid.png
 apple_touch_icon: /img/fluid.png
 
 navbar:
-  blog_title: "ElonYang的博客"
+  blog_title: "ElonYang 的博客"
   ground_glass:
     enable: false
   menu:
     - { key: "首页", link: "/", icon: "iconfont icon-home-fill" }
-    - { key: "归档", link: "/archives/", icon: "iconfont icon-archive-fill" }
+    - { key: "文章", link: "/posts/", icon: "iconfont icon-archive-fill" }
+    - { key: "分类", link: "/categories/", icon: "iconfont icon-category-fill" }
+    - { key: "标签", link: "/tags/", icon: "iconfont icon-tags-fill" }
     - { key: "关于", link: "/about/", icon: "iconfont icon-user-fill" }
 
 search:
@@ -60,3 +62,6 @@ footer:
 
 custom_css:
   - /css/custom.css
+
+custom_js:
+  - /js/cartoon-cursor.js

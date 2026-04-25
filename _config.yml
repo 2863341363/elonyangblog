@@ -2,10 +2,10 @@
 # Docs: https://hexo.io/docs/configuration.html
 
 # Site
-title: ElonYang的博客
-subtitle: 记录学习、技术和生活
-description: ElonYang 的个人博客
-keywords: blog, learning, programming
+title: ElonYang 的博客
+subtitle: 在柔软的小岛上，记录灵感、代码与生活
+description: ElonYang 的个人博客，记录设计观察、开发笔记、产品思考和日常片段
+keywords: ElonYang, blog, personal blog, programming, design, product
 author: ElonYang
 language: zh-CN
 timezone: Asia/Shanghai
