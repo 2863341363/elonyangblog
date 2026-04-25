@@ -1,30 +1,38 @@
 import subprocess
 import sys
+import locale
 from pathlib import Path
 
 
 BLOG_DIR = Path(__file__).resolve().parent
 
 
+def decode_output(data):
+    for encoding in ("utf-8", "utf-8-sig", locale.getpreferredencoding(False), "gbk"):
+        try:
+            return data.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return data.decode("utf-8", errors="replace")
+
+
 def run(args, check=True, capture=False):
     result = subprocess.run(
         args,
         cwd=BLOG_DIR,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
         stdout=subprocess.PIPE if capture else None,
         stderr=subprocess.STDOUT if capture else None,
     )
+    output = decode_output(result.stdout) if capture and result.stdout is not None else ""
     if check and result.returncode != 0:
-        if capture and result.stdout:
-            print(result.stdout)
+        if output:
+            print(output)
         raise SystemExit(result.returncode)
-    return result.stdout if capture else ""
+    return output if capture else ""
 
 
 def get_changed_files():
-    output = run(["git", "status", "--porcelain"], capture=True)
+    output = run(["git", "-c", "core.quotepath=false", "status", "--porcelain"], capture=True)
     files = []
     for line in output.splitlines():
         if not line.strip():
