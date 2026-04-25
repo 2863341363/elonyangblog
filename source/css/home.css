@@ -30,6 +30,11 @@ a {
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
   min-height: 100vh;
+  transition: grid-template-columns 0.22s ease;
+}
+
+.desktop.sidebar-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr);
 }
 
 .sidebar {
@@ -40,6 +45,13 @@ a {
   padding: 34px 28px;
   color: #f8fbff;
   background: linear-gradient(180deg, #111d29, #21364a);
+  transition: opacity 0.2s ease, transform 0.22s ease, visibility 0.2s ease;
+}
+
+.desktop.sidebar-collapsed .sidebar {
+  opacity: 0;
+  transform: translateX(-100%);
+  visibility: hidden;
 }
 
 .brand {
@@ -129,7 +141,7 @@ a {
 
 .topbar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   min-height: 64px;
   overflow: hidden;
@@ -157,6 +169,23 @@ a {
 
 .window-dots span:nth-child(3) {
   background: #ef7f7f;
+}
+
+.sidebar-toggle {
+  min-height: 34px;
+  margin-left: 18px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 6px;
+  color: #f8fbff;
+  background: rgba(255, 255, 255, 0.1);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .hero-title {
@@ -267,8 +296,10 @@ a {
   }
 
   .window-dots,
+  .sidebar-toggle,
   .nav {
     padding: 0 22px;
+    margin-left: 0;
   }
 
   .hero-title {

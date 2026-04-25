@@ -79,6 +79,7 @@ hexo.extend.generator.register('custom-home', function(locals) {
         <div class="window-dots" aria-hidden="true">
           <span></span><span></span><span></span>
         </div>
+        <button class="sidebar-toggle" type="button" aria-expanded="true">☰ 文章侧栏</button>
         <div class="hero-title">记录学习、技术和生活</div>
         <nav class="nav">
           <a href="/posts/">文章</a>
@@ -118,6 +119,15 @@ hexo.extend.generator.register('custom-home', function(locals) {
     const excerpt = document.getElementById('feature-excerpt');
     const link = document.getElementById('feature-link');
     const buttons = Array.from(document.querySelectorAll('.post-link'));
+    const shell = document.querySelector('.desktop');
+    const toggle = document.querySelector('.sidebar-toggle');
+
+    function setSidebarCollapsed(collapsed) {
+      shell.classList.toggle('sidebar-collapsed', collapsed);
+      toggle.setAttribute('aria-expanded', String(!collapsed));
+      toggle.textContent = collapsed ? '☰ 打开侧栏' : '☰ 收起侧栏';
+      localStorage.setItem('home-sidebar-collapsed', collapsed ? '1' : '0');
+    }
 
     function render(index) {
       if (!posts.length) return;
@@ -143,6 +153,11 @@ hexo.extend.generator.register('custom-home', function(locals) {
       });
     });
 
+    toggle.addEventListener('click', () => {
+      setSidebarCollapsed(!shell.classList.contains('sidebar-collapsed'));
+    });
+
+    setSidebarCollapsed(localStorage.getItem('home-sidebar-collapsed') === '1');
     render(0);
     startTimer();
   </script>
