@@ -23,7 +23,7 @@ def run(args, check=True, capture=False):
     return result.stdout if capture else ""
 
 
-def git_status():
+def get_changed_files():
     output = run(["git", "status", "--porcelain"], capture=True)
     files = []
     for line in output.splitlines():
@@ -37,44 +37,82 @@ def git_status():
     return files
 
 
-def print_files(files):
+def print_changed_files(files):
     print("\n检测到以下改动文件：")
-    for index, (status, path) in enumerate(files, start=1):
-        print(f"{index:>2}. [{status}] {path}")
+    for status, path in files:
+        print(f"  [{status}] {path}")
+
+
+def match_files(files, text):
+    query = text.strip().replace("\\", "/").strip('"').strip("'")
+    if not query:
+        return []
+
+    paths = [path for _, path in files]
+    exact = [path for path in paths if path == query]
+    if exact:
+        return exact
+
+    exact_name = [path for path in paths if Path(path).name == query]
+    if exact_name:
+        return exact_name
+
+    query_lower = query.lower()
+    return [path for path in paths if query_lower in path.lower()]
 
 
 def choose_files(files):
     print("\n请选择操作：")
     print("  1  提交全部改动文件")
-    print("  2  选择要提交的文件")
+    print("  2  输入文件名选择要提交的文件")
     print("  3  退出")
 
     while True:
         choice = input("\n请输入选项 1/2/3：").strip()
-        if choice == "3":
-            raise SystemExit("已取消。")
         if choice == "1":
             return [path for _, path in files]
+        if choice == "3":
+            raise SystemExit("已取消。")
         if choice != "2":
             print("请输入 1、2 或 3。")
             continue
 
-        selected_text = input("请输入要提交的文件编号，多个编号用英文逗号分隔，例如 1,3,5：").strip()
+        selected = []
+        print("\n请输入要提交的文件名或路径。")
+        print("可以输入多个，用英文逗号分隔，例如：学习路线.md,_config.yml")
+        text = input("文件名：").strip()
 
-        try:
-            indexes = [int(part.strip()) for part in selected_text.split(",") if part.strip()]
-        except ValueError:
-            print("请输入正确的文件编号，例如 1,3,5。")
-            continue
+        for part in [item.strip() for item in text.split(",") if item.strip()]:
+            matches = match_files(files, part)
+            if not matches:
+                print(f"没有找到匹配的文件：{part}")
+                selected = []
+                break
+            if len(matches) == 1:
+                selected.append(matches[0])
+                continue
 
-        if not indexes or any(index < 1 or index > len(files) for index in indexes):
-            print("文件编号超出范围。")
-            continue
+            print(f"\n“{part}”匹配到多个文件：")
+            for index, path in enumerate(matches, start=1):
+                print(f"  {index}. {path}")
+            index_text = input("请输入要选择的编号：").strip()
+            try:
+                index = int(index_text)
+            except ValueError:
+                print("编号无效。")
+                selected = []
+                break
+            if index < 1 or index > len(matches):
+                print("编号超出范围。")
+                selected = []
+                break
+            selected.append(matches[index - 1])
 
-        return [files[index - 1][1] for index in indexes]
+        if selected:
+            return list(dict.fromkeys(selected))
 
 
-def ask_message():
+def ask_commit_message():
     while True:
         message = input("\n请输入提交说明：").strip()
         if message:
@@ -84,16 +122,17 @@ def ask_message():
 
 def main():
     print(f"博客目录：{BLOG_DIR}")
-    run(["git", "config", "--global", "--add", "safe.directory", str(BLOG_DIR).replace("\\", "/")], check=False)
+    safe_dir = str(BLOG_DIR).replace("\\", "/")
+    run(["git", "config", "--global", "--add", "safe.directory", safe_dir], check=False)
 
-    files = git_status()
+    files = get_changed_files()
     if not files:
         print("没有需要发布的改动。")
         return
 
-    print_files(files)
+    print_changed_files(files)
     selected = choose_files(files)
-    message = ask_message()
+    message = ask_commit_message()
 
     print("\n正在生成 Hexo 博客...")
     run(["npm", "run", "build"])
