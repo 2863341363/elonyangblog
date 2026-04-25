@@ -6,6 +6,10 @@ from pathlib import Path
 
 
 BLOG_DIR = Path(__file__).resolve().parent
+NPM_CANDIDATES = [
+    "npm.cmd",
+    r"D:\Environment\NodeJS\npm.cmd",
+]
 
 
 def configure_console():
@@ -38,6 +42,17 @@ def run(args, check=True, capture=False):
             print(output)
         raise SystemExit(result.returncode)
     return output if capture else ""
+
+
+def find_npm():
+    for candidate in NPM_CANDIDATES:
+        if candidate == "npm.cmd":
+            return candidate
+        if Path(candidate).exists():
+            return candidate
+    raise FileNotFoundError(
+        "没有找到 npm.cmd。请确认 Node.js 已安装，或把 npm.cmd 路径加入脚本的 NPM_CANDIDATES。"
+    )
 
 
 def get_changed_files():
@@ -153,7 +168,7 @@ def main():
     message = ask_commit_message()
 
     print("\n正在生成 Hexo 博客...")
-    run(["npm", "run", "build"])
+    run([find_npm(), "run", "build"])
 
     print("\n正在暂存文件...")
     run(["git", "add", "--", *selected])
