@@ -5,12 +5,12 @@
   <div class="hero-copy">
     <p class="eyebrow">Personal Journal</p>
     <h1>记录学习、技术和生活</h1>
-    <p>在稳定的节奏里写下问题、答案和慢慢成形的判断。</p>
+    <p>把学习、项目和踩坑记录下来，留给未来的自己复盘。</p>
   </div>
   <div class="hero-note" aria-label="博客状态">
     <span>Now</span>
-    <strong>把新的想法写成可回看的记录。</strong>
-    <p>技术笔记、学习路线、项目复盘，还有一些日常观察。</p>
+    <strong>从第一篇真正想留下来的文章开始。</strong>
+    <p>知识分享、项目复盘、资源共享，还有一点长期主义的学习记录。</p>
   </div>
 </section>
 
@@ -29,10 +29,14 @@
           <p class="meta"><%= date(post.date, 'YYYY-MM-DD') %><% if (post.categories && post.categories.length) { %> · <%= post.categories.first().name %><% } %></p>
           <h3><a href="<%- url_for(post.path) %>"><%= post.title %></a></h3>
           <p><%= strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 120) || '这篇文章还没有摘要，点进去继续阅读。' %></p>
+          <a class="post-row-link" href="<%- url_for(post.path) %>" aria-label="阅读：<%= post.title %>"></a>
         </article>
       <% }) %>
     <% } else { %>
-      <p class="empty">还没有文章，先写下第一篇吧。</p>
+      <div class="empty-state">
+        <h3>还没有文章</h3>
+        <p>下一篇写作会从这里开始。可以先记录一个问题、一次项目复盘，或者一份值得收藏的资源。</p>
+      </div>
     <% } %>
   </div>
 
@@ -45,10 +49,10 @@
           <a href="<%- url_for(category.path) %>"><span><%= category.name %></span><em><%= category.length %></em></a>
         <% }) %>
       <% } else { %>
-        <a href="<%- url_for('/categories/') %>"><span>技术笔记</span><em>0</em></a>
-        <a href="<%- url_for('/categories/') %>"><span>学习路线</span><em>0</em></a>
+        <a href="<%- url_for('/categories/') %>"><span>知识分享</span><em>0</em></a>
         <a href="<%- url_for('/categories/') %>"><span>项目复盘</span><em>0</em></a>
-        <a href="<%- url_for('/categories/') %>"><span>生活随笔</span><em>0</em></a>
+        <a href="<%- url_for('/categories/') %>"><span>资源共享</span><em>0</em></a>
+        <a href="<%- url_for('/categories/') %>"><span>学习路线</span><em>0</em></a>
       <% } %>
     </div>
   </aside>

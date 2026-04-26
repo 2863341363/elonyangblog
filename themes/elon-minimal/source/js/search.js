@@ -36,6 +36,7 @@
         <p class="meta">${post.date}${post.category ? ` · ${post.category}` : ''}</p>
         <h2><a href="${post.url}">${post.title}</a></h2>
         <p>${post.summary || '这篇文章还没有摘要。'}</p>
+        <a class="post-row-link" href="${post.url}" aria-label="阅读：${post.title}"></a>
       `;
       fragment.appendChild(article);
     });

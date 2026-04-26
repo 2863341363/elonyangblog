@@ -1,9 +1,48 @@
 <% const posts = site.posts.sort('-date').toArray(); %>
+<% const tags = site.tags.sort('name').toArray(); %>
+<% const searchPosts = posts.map(function(post) {
+  return {
+    title: post.title,
+    url: url_for(post.path),
+    date: date(post.date, 'YYYY-MM-DD'),
+    category: post.categories && post.categories.length ? post.categories.first().name : '',
+    tags: post.tags && post.tags.length ? post.tags.map(function(tag) { return tag.name; }).join(' ') : '',
+    summary: strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 180)
+  };
+}); %>
 
 <section class="page-title">
   <p class="eyebrow">Archive</p>
   <h1>文章</h1>
-  <p>按时间浏览所有记录，新的思考放在前面。</p>
+  <p>按时间浏览所有记录，也可以用搜索和标签快速定位内容。</p>
+</section>
+
+<section class="article-tools">
+  <div class="paper search-panel article-search">
+    <label class="search-box">
+      <span>搜索文章</span>
+      <input id="search-input" type="search" placeholder="输入关键词搜索..." autocomplete="off">
+    </label>
+    <p id="search-status" class="result-count">输入关键词后显示结果。</p>
+    <div id="search-results"></div>
+    <script id="search-data" type="application/json"><%- JSON.stringify(searchPosts).replace(/</g, '\\u003c') %></script>
+  </div>
+
+  <aside class="paper article-tags">
+    <p class="eyebrow">Tags</p>
+    <h2>标签</h2>
+    <div class="compact-tag-cloud">
+      <% if (tags.length) { %>
+        <% tags.forEach(function(tag) { %>
+          <a href="<%- url_for(tag.path) %>"><%= tag.name %> <span><%= tag.length %></span></a>
+        <% }) %>
+      <% } else { %>
+        <% ['知识分享', '项目复盘', '资源共享', '学习路线'].forEach(function(name) { %>
+          <span class="tag-placeholder"><%= name %></span>
+        <% }) %>
+      <% } %>
+    </div>
+  </aside>
 </section>
 
 <section class="paper">
@@ -11,11 +50,19 @@
     <span>共 <%= posts.length %> 篇文章</span>
     <span>按发布时间倒序</span>
   </div>
-  <% posts.forEach(function(post) { %>
-    <article class="post-row">
-      <p class="meta"><%= date(post.date, 'YYYY-MM-DD') %><% if (post.categories && post.categories.length) { %> · <%= post.categories.first().name %><% } %></p>
-      <h2><a href="<%- url_for(post.path) %>"><%= post.title %></a></h2>
-      <p><%= strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 150) || '这篇文章还没有摘要。' %></p>
-    </article>
-  <% }) %>
+  <% if (posts.length) { %>
+    <% posts.forEach(function(post) { %>
+      <article class="post-row">
+        <p class="meta"><%= date(post.date, 'YYYY-MM-DD') %><% if (post.categories && post.categories.length) { %> · <%= post.categories.first().name %><% } %></p>
+        <h2><a href="<%- url_for(post.path) %>"><%= post.title %></a></h2>
+        <p><%= strip_html(post.excerpt || post.content || '').replace(/\s+/g, ' ').trim().slice(0, 150) || '这篇文章还没有摘要。' %></p>
+        <a class="post-row-link" href="<%- url_for(post.path) %>" aria-label="阅读：<%= post.title %>"></a>
+      </article>
+    <% }) %>
+  <% } else { %>
+    <div class="empty-state">
+      <h2>还没有文章</h2>
+      <p>创建第一篇 Markdown 后，它会出现在这里，并自动进入对应分类和标签。</p>
+    </div>
+  <% } %>
 </section>
