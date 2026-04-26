@@ -1,6 +1,7 @@
 import locale
 import os
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime
@@ -9,6 +10,11 @@ from pathlib import Path
 
 BLOG_DIR = Path(__file__).resolve().parent
 POSTS_DIR = BLOG_DIR / "source" / "_posts"
+STATIC_IMAGE_DIR = BLOG_DIR / "source" / "images"
+MARKDOWN_IMAGE_RE = re.compile(
+    r"(!\[[^\]]*\]\()([^)#?\s]+?\.(?:png|jpe?g|gif|webp|svg|bmp))(\))",
+    re.IGNORECASE,
+)
 NPM_CANDIDATES = [
     "npm.cmd",
     r"D:\Environment\NodeJS\npm.cmd",
@@ -282,6 +288,83 @@ def ensure_publishable_posts():
         print("文章配置检查通过。")
 
 
+def is_external_or_static_image(url):
+    lowered = url.lower()
+    return (
+        lowered.startswith(("http://", "https://", "//", "data:", "mailto:"))
+        or url.startswith(("/", "#"))
+        or "{" in url
+    )
+
+
+def unique_destination(path):
+    if not path.exists():
+        return path
+
+    stem = path.stem
+    suffix = path.suffix
+    parent = path.parent
+    index = 2
+    while True:
+        candidate = parent / f"{stem}-{index}{suffix}"
+        if not candidate.exists():
+            return candidate
+        index += 1
+
+
+def move_local_post_images():
+    posts = list_posts()
+    if not posts:
+        return []
+
+    moved = []
+    changed_posts = set()
+
+    for post in posts:
+        text = post.read_text(encoding="utf-8-sig")
+        article_dir = STATIC_IMAGE_DIR / slugify_filename(post.stem)
+
+        def replace_image(match):
+            prefix, url, suffix = match.groups()
+            if is_external_or_static_image(url):
+                return match.group(0)
+
+            source = (post.parent / url).resolve()
+            if not source.exists() or not source.is_file():
+                return match.group(0)
+
+            article_dir.mkdir(parents=True, exist_ok=True)
+            destination = article_dir / source.name
+            if source != destination.resolve():
+                destination = unique_destination(destination)
+                shutil.move(str(source), str(destination))
+                moved.append((source, destination))
+
+            new_url = f"/images/{article_dir.name}/{destination.name}"
+            changed_posts.add(post)
+            return f"{prefix}{new_url}{suffix}"
+
+        updated = MARKDOWN_IMAGE_RE.sub(replace_image, text)
+        if updated != text:
+            post.write_text(updated, encoding="utf-8", newline="\n")
+
+    for folder in sorted(POSTS_DIR.rglob("*"), reverse=True):
+        if folder.is_dir():
+            try:
+                folder.rmdir()
+            except OSError:
+                pass
+
+    if moved or changed_posts:
+        print("\nImages moved for Cloudflare Pages:")
+        for source, destination in moved:
+            print(f"  {source.relative_to(BLOG_DIR)} -> {destination.relative_to(BLOG_DIR)}")
+        for post in sorted(changed_posts):
+            print(f"  updated {post.relative_to(BLOG_DIR)}")
+
+    return moved
+
+
 def choose_workflow():
     print("\n请选择操作：")
     print("  1  新建文章，只创建 Markdown 文件，不发布")
@@ -426,6 +509,7 @@ def main():
         raise SystemExit("已取消。")
 
     ensure_publishable_posts()
+    move_local_post_images()
 
     files = get_changed_files()
     if not files:
